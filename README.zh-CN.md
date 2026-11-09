@@ -6,13 +6,11 @@
 
 **字幕使用 PPT 内部原生文本框和动画实现，PPTX 中的文字可以继续编辑。** Codex 先编排时间表，再调用桌面版 PowerPoint 添加淡入淡出和自动翻页，最后由 PowerPoint 导出 MP4。
 
+## 演示与下载
+
 ![字幕自动播放效果](media/subtitle-playback.gif)
 
-*动图取自 PowerPoint 实际导出的视频，用于快速展示字幕切换效果，经过缩短与抽帧，不作为精确时间依据。*
-
-## 最终效果与可下载示例
-
-![最终字幕效果图](media/result.png)
+*上方为实际导出视频的 8 秒抽帧预览，完整 24 秒视频及源文件见下方。*
 
 - [可编辑字幕 PPTX](examples/subtitle-demo_captioned.pptx)
 - [实际导出的视频 MP4](examples/subtitle-demo_review.mp4)

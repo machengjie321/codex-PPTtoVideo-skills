@@ -6,13 +6,11 @@
 
 Codex prepares a subtitle timeline, adds native PowerPoint text boxes, applies Fade entrance and exit animations, sets automatic slide advance, and exports an MP4 through desktop Microsoft PowerPoint. The captions remain editable in the PPTX.
 
+## Demo and downloads
+
 ![Animated subtitle playback](media/subtitle-playback.gif)
 
-*This GIF samples frames from the actual PowerPoint-exported demonstration video. It is a shortened visual preview, not a timing reference.*
-
-## Final result
-
-![PowerPoint subtitle result](media/result.png)
+*Above: an eight-second sampled preview of the exported video. Download the full 24-second video and source files below.*
 
 - [Captioned demo PPTX](examples/subtitle-demo_captioned.pptx)
 - [Actual exported MP4](examples/subtitle-demo_review.mp4)
