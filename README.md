@@ -66,11 +66,15 @@ Then pass `timeline-estimated.csv` to the PowerPoint helper below. Python 3 is r
 Example Codex request:
 
 ```text
-Use $powerpoint-auto-subtitles. Read my PPT and draft English captions
-page by page, with one idea per cue. Save them as captions.md using
-## Slide N headings and one bullet per caption. Estimate timing at
-2.5 words/s, generate the CSV, and synchronize the diagram changes with
-the final cues. Export the editable PPTX and MP4, then verify playback.
+Use $powerpoint-auto-subtitles.
+PPTX: C:/work/my-presentation.pptx
+Caption source: no existing script. Draft English captions only from this deck's
+visible text, figures and speaker notes. Use one idea per cue; invent no results.
+Narration: none. Output directory: C:/work/captioned-output
+Save captions.md with ## Slide N headings and one bullet per caption.
+Timing: estimate at 2.5 English words/s, with no fixed total duration; report the estimate first.
+Generate the CSV and synchronize requested diagram changes with the final cues.
+Export editable PPTX, MP4, PDF, timing CSV and QA notes; inspect actual playback.
 ```
 
 ## How it works
@@ -140,12 +144,23 @@ Refresh the available skills or start a new Codex chat if the new skill is not l
 
 ## Ask Codex to use it
 
+Replace the example paths with actual existing files and a new output folder. This example uses a supplied caption document. For automatic drafting, use the earlier complete prompt. An attachment can replace a path if identified by its exact filename. If using audio, give its path and request alignment to that recording.
+
 ```text
-Use $powerpoint-auto-subtitles to add editable English captions to this
-PowerPoint and export an autoplay MP4. Target 160 seconds. Build a timeline,
-reserve a subtitle band, apply native Fade entrance/exit effects, and verify
-the actual video. Preserve all measured values and editable diagrams.
-Deliver the PPTX, MP4, PDF preview, final timing CSV, and a short QA report.
+Use $powerpoint-auto-subtitles.
+PPTX: C:/work/my-presentation.pptx
+Caption source: C:/work/captions.md (## Slide N headings; one bullet per cue)
+Caption language: English. Preserve the supplied wording; flag any needed translation or rewriting.
+Output directory: C:/work/captioned-output
+Narration: none; create a silent captioned video.
+Target total duration: 160 seconds.
+Read the files, check slide-to-caption correspondence, and generate the final timeline first.
+Estimate reading time from text length. If the captions cannot fit readably within
+160 seconds, report the conflict rather than silently shortening text or speeding it up.
+Apply native PowerPoint fades and automatic slide advance. Preserve all measured
+values, charts and editable shapes. Do not overwrite the source.
+Inspect the actual MP4 captions and duration. Deliver PPTX, MP4, PDF preview,
+final timing CSV and a short QA report.
 ```
 
 The example target of 160 seconds is configurable. The included public demo is 24 seconds.

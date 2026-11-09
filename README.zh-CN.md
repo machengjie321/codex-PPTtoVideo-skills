@@ -96,12 +96,22 @@ Copy-Item -LiteralPath ./codex-PPTtoVideo-skills/powerpoint-auto-subtitles `
 
 ## 向 Codex 提出的示例请求
 
+请把示例路径替换为实际存在的文件和新的输出目录。下面使用已有字幕文档；文末另有“从 PPT 起草字幕”的完整请求。也可以用附件的准确文件名指定输入。若有配音，请同时写明音频路径并要求按实际语音对齐。
+
 ```text
-请使用 $powerpoint-auto-subtitles，为这份 PPT 添加可编辑英文字幕，
-并导出自动播放的 MP4。目标总时长 160 秒。
-请先生成字幕时间表，再用 PPT 原生淡入淡出动画和自动翻页实现播放。
-保留原有实验数值、图表和可编辑图形，检查实际导出视频的字幕与时长。
-交付 PPTX、MP4、PDF 预览、最终字幕时间表和简短 QA 记录。
+请使用 $powerpoint-auto-subtitles。
+PPT 文件：C:/work/my-presentation.pptx
+字幕来源：C:/work/captions.md（按 ## Slide N 分页，每个列表项是一条字幕）
+字幕语言：英文；保留字幕原文，若需要翻译或改写，先指出。
+输出目录：C:/work/captioned-output
+配音：无；制作无声字幕视频。
+目标总时长：160 秒。
+先读取并核对 PPT 页数与字幕对应关系，生成最终字幕时间表。
+按字数估算阅读时间；如果字幕无法在 160 秒内清晰展示，报告冲突，
+不要擅自删减文字或强行加速。
+用 PPT 原生淡入淡出动画和自动翻页播放，保留原有数值、图表和可编辑图形。
+检查实际导出视频的字幕及总时长，不覆盖源文件。
+交付 PPTX、MP4、PDF 预览、最终字幕 CSV 和简短 QA 记录。
 ```
 
 160 秒只是示例目标，实际页数与时长可以调整。本仓库的公开效果演示为 24 秒。
@@ -183,11 +193,15 @@ python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
 可以这样向 Codex 提要求：
 
 ```text
-使用 $powerpoint-auto-subtitles，读取我的 PPT，按页起草英文字幕，
-每条只表达一个意思。以 ## Slide N 为标题、每条字幕一行列表，
-保存为 captions.md。按英文每秒 2.5 词估算时间并生成 CSV，
-让上方图形变化与最终字幕时间同步。导出可编辑 PPT 和 MP4，
-检查实际视频的字幕切换、图形同步和总时长。
+使用 $powerpoint-auto-subtitles。
+PPT 文件：C:/work/my-presentation.pptx
+字幕来源：没有现成字幕；请仅依据这个 PPT 的可见文字、图表和演讲者备注，
+按页起草英文字幕，每条一个意思，不添加没有依据的实验结果。
+配音：无。输出目录：C:/work/captioned-output
+将字幕稿保存为 captions.md，以 ## Slide N 为标题，每条字幕一行列表。
+时长策略：按英文每秒 2.5 词估算，无固定总时长；先报告预计总时长。
+生成 CSV，让需要变化的图形与最终字幕时间同步。
+导出可编辑 PPTX、MP4、PDF、时间表和 QA 记录，检查实际播放效果。
 ```
 
 这些速度是可调的初始估算，不是实测阅读速度。有配音时优先使用真实语音时间。要求固定总时长时，先调整文案，不能一味压缩显示时间。通用脚本只添加字幕；图形动画需单独按最终时间表编排。

@@ -9,7 +9,9 @@ Turn an existing local PPTX into an editable captioned presentation and a video.
 
 ## Inputs and decisions
 
-Identify the source PPTX, desired total duration, caption language, and any real media to include. Reuse supplied assets and measured values. If no audio is supplied, write concise captions from the slide content; do not describe this as speech transcription. When audio exists, align captions to the actual narration.
+Resolve a specific source PPTX (existing absolute path, exact attachment name, or explicitly identified open deck), the output directory, duration policy, caption language, and caption source before authoring. Caption sources can be a named document, explicitly supplied per-slide text, a named narration file, or an explicit request to draft from the deck. Verify that referenced files exist and that captions map to the actual slide order. If the source deck or caption source remains ambiguous in the conversation, ask only for that missing information; do not select an unrelated historical deck or invent a script source. A pasted example request with placeholder paths is not a real input deck.
+
+Identify any real media to include. Reuse supplied assets and measured values. If no audio is supplied, write concise captions from the slide content; do not describe this as speech transcription. When audio exists, align captions to the actual narration.
 
 For drafting captions from slides, accepting per-slide text or a document, and estimating timing from text length, read [caption authoring and timing](references/caption-authoring.md). The included `scripts/captions-to-timeline.py` converts normalized Markdown/TXT to the animation CSV with adjustable English-word and Chinese-character reading rates. Use actual speech timings when narration exists.
 
