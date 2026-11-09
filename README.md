@@ -1,4 +1,4 @@
-# Codex PowerPoint Subtitles
+# codex-PPTtoVideo-skills
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
@@ -21,6 +21,10 @@ Codex prepares a subtitle timeline, adds native PowerPoint text boxes, applies F
 - [Demo verification notes](examples/VERIFICATION.md)
 
 The public example contains three generic slides, nine captions, and 24 seconds of playback. It does not include research data or laboratory photographs.
+
+## Two synchronized animated diagrams
+
+The upper half now contains two changing diagrams: an editable slide builds up on the left, while a video player and cue timeline advance on the right. Both change with the bottom caption. The demo groups each pair of diagram states with its editable caption and applies native Fade entrance/exit effects to that group. This explicit scene choreography is separate from the general caption-only helper. No screen recording or pre-rendered GIF is embedded in the PPTX.
 
 ## How it works
 
@@ -80,8 +84,8 @@ An export-success status or a valid timeline CSV alone does not prove correct pl
 Clone this repository and copy the `powerpoint-auto-subtitles` folder into your Codex skills directory. The usual Windows location is `%USERPROFILE%\.codex\skills`; use your configured `CODEX_HOME` if it differs.
 
 ```powershell
-git clone https://github.com/machengjie321/codex-powerpoint-subtitles.git
-Copy-Item -LiteralPath ./codex-powerpoint-subtitles/powerpoint-auto-subtitles `
+git clone https://github.com/machengjie321/codex-PPTtoVideo-skills.git
+Copy-Item -LiteralPath ./codex-PPTtoVideo-skills/powerpoint-auto-subtitles `
   -Destination "$env:USERPROFILE/.codex/skills/powerpoint-auto-subtitles" -Recurse
 ```
 

@@ -87,8 +87,8 @@ Codex 读取现有 PPT，保留图表、表格及可编辑图形，为字幕预�
 克隆仓库，将其中 `powerpoint-auto-subtitles` 文件夹放入 Codex 的 skills 目录。Windows 常见位置是 `%USERPROFILE%\.codex\skills`；如配置了其他 `CODEX_HOME`，使用对应位置。
 
 ```powershell
-git clone https://github.com/machengjie321/codex-powerpoint-subtitles.git
-Copy-Item -LiteralPath ./codex-powerpoint-subtitles/powerpoint-auto-subtitles `
+git clone https://github.com/machengjie321/codex-PPTtoVideo-skills.git
+Copy-Item -LiteralPath ./codex-PPTtoVideo-skills/powerpoint-auto-subtitles `
   -Destination "$env:USERPROFILE/.codex/skills/powerpoint-auto-subtitles" -Recurse
 ```
 
@@ -133,3 +133,7 @@ pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-fra
 更多内容见 [英文 Skill](powerpoint-auto-subtitles/SKILL.md)、[英文流程介绍](powerpoint-auto-subtitles/references/workflow-walkthrough.md) 和 [PowerPoint 实现与检查说明](powerpoint-auto-subtitles/references/office-workflow.md)。
 
 编辑模式中，多条字幕文本框可能叠放在同一区域；播放时由动画控制出现与消失。静态 PDF 和 PNG 每页只展示首条字幕。
+
+## 两幅同步变化的示意图
+
+上方左图展示幻灯片内容逐步出现，右图展示视频播放与字幕时间轴推进；下方字幕同步切换。演示将每个时段的两幅图与可编辑字幕编为一组，再添加 PowerPoint 原生淡入/淡出动画。此演示使用专门的场景编排，通用字幕脚本仍只负责字幕，不会自动改写已有图形动画。PPTX 中未嵌入录屏或预渲染 GIF。

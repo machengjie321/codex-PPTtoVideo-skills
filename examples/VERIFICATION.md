@@ -1,16 +1,17 @@
 # Public demo verification
 
-The example was generated using the bundled subtitle helper and desktop Microsoft PowerPoint on Windows.
+The example was generated using the demo-specific two-panel authoring script and desktop Microsoft PowerPoint on Windows.
 
 | Check | Observed result |
 |---|---|
 | Slides | 3, 16:9 |
 | Captions | 9 native editable text boxes |
-| Fade effects | 18 native effects, entrance and exit per caption |
+| Fade effects | 18 native effects, entrance and exit per synchronized scene group |
 | Scheduled duration | 24.0 seconds |
 | Decoded MP4 duration | 24.0 seconds |
 | MP4 export | PowerPoint task completed |
 | Caption check | A decoded frame inside each of the 9 cue intervals was inspected |
+| Diagram check | Both upper diagrams change through three states per slide, synchronized with the caption |
 | Caption changes | Correct text in the sampled intervals, with no overlapping residual text |
 | Preview animation | 64 decoded frames from the first 8 seconds, sampled at 8 fps |
 | Original source | Retained as `subtitle-demo.pptx`; source integrity checked by the helper |
@@ -26,7 +27,7 @@ These checks establish the observed behavior of this example. They do not guaran
 From the repository root:
 
 ```powershell
-pwsh -NoProfile -File ./powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1 `
+pwsh -NoProfile -File ./examples/animate-two-panels.ps1 `
   -InputPptx ./examples/subtitle-demo.pptx `
   -TimelineCsv ./examples/timeline.csv `
   -OutputDirectory ./local-output
@@ -38,3 +39,4 @@ pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-fra
 ```
 
 Inspect the extracted images, compare their captions with the manifest, and check the decoded duration before describing the new export as verified.
+
