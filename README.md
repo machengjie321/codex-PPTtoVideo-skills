@@ -46,13 +46,13 @@ Refresh the available skills or start a new Codex chat if the new skill is not l
 
 ## Complete workflow
 
-**Agent drafts captions from PPTX → user edits the document → Agent receives final captions → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
+**Prepare captions (choose: Agent drafts from PPTX / user supplies captions and Agent normalizes the format) → user reviews, edits and confirms → Agent receives final captions → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
 
-## Step 1: Have the Agent draft captions, then edit them
+## Step 1: Prepare captions, then review and confirm
 
-You do not need to fill a blank template first. Give the PPTX to the Codex Agent: it reads slide text, figures and speaker notes, drafts per-slide captions, and saves a standard `captions.md`. Open that file, revise the wording and check the facts before producing the video.
+Choose one of two paths: have the Agent draft captions from the PPTX, or supply your own captions for format normalization. Both produce a standard `captions.md` for you to review, edit and confirm before video production.
 
-**1. Ask the Agent to generate a draft**
+### Path A: Agent drafts captions from the PPTX
 
 Replace these example paths with real locations:
 
@@ -73,7 +73,30 @@ before asking you to create animations and export the video.
 
 If you have speaker material, add “Reference script: C:/work/notes.docx”. Ask the Agent to flag conflicts with the deck in the review notes instead of choosing a value silently.
 
-**2. Open and edit `captions.md`**
+### Path B: Supply captions and let the Agent normalize the format
+
+Provide your existing Word, TXT, Markdown or pasted captions together with the PPTX. The Agent organizes them without generating a replacement script.
+
+```text
+Use $powerpoint-auto-subtitles to format my supplied captions, not redraft them.
+PPTX: C:/work/my-presentation.pptx
+My captions: C:/work/my-subtitles.docx (or pasted text labeled by slide)
+Normalized output: C:/work/captions.md (UTF-8; preserve the source file)
+Review notes: C:/work/captions-review.md
+Map captions to actual slide order using ## Slide N and one - bullet per cue.
+Normalize formatting and check slide mapping only. Preserve my wording, order,
+values and units. Do not translate, polish or add captions without my request.
+If splitting a paragraph, retain the original text order. Suggest meaning-changing
+edits only in the review notes rather than applying them.
+Flag missing pages, ambiguous mappings and conflicts with the PPTX; do not guess.
+Deliver the normalized captions and review notes. Wait for my manual review,
+edits and confirmation before producing the video.
+```
+
+If you also want translation or polishing, specify the target language and permitted scope.
+
+### Both paths: Review, edit and confirm the caption file
+
 
 Use Notepad, VS Code or another text editor. Check slide correspondence, values and units; remove unwanted narration, add necessary explanations, polish the English and split long cues. Save as UTF-8 while retaining this structure:
 
@@ -97,9 +120,9 @@ Use Notepad, VS Code or another text editor. Check slide correspondence, values 
 
 [Standard template](examples/captions.template.md) · [English example](examples/captions.en.md) · [Chinese format example](examples/captions.zh-CN.md) (format references, not forms you must fill from scratch).
 
-**3. Return the edited captions to the Agent**
+### Return the confirmed captions to the Agent
 
-After editing, use the Step 2 request below and name `C:/work/captions.md` as the final caption source. The Agent should retain your edited wording and recalculate timing, not replace your script with a fresh draft from the deck. Explicitly request a one-pass workflow if you want to skip manual review.
+After reviewing, editing and confirming, use the Step 2 request below and name `C:/work/captions.md` as the final caption source. The Agent should retain your edited wording and recalculate timing, not replace your script with a fresh draft from the deck. Explicitly request a one-pass workflow if you want to skip manual review.
 
 ## Step 2: Submit the complete production request
 
@@ -108,7 +131,7 @@ Replace the example paths with actual existing files and a new output folder. Th
 ```text
 Use $powerpoint-auto-subtitles.
 PPTX: C:/work/my-presentation.pptx
-Caption source: C:/work/captions.md (my manually edited final English captions)
+Caption source: C:/work/captions.md (my reviewed and confirmed final English captions)
 Caption language: English. Preserve my edited wording; do not regenerate or overwrite the script.
 Output directory: C:/work/captioned-output
 Narration: none; create a silent captioned video.

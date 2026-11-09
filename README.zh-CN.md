@@ -45,13 +45,13 @@ Copy-Item -LiteralPath ./codex-PPTtoVideo-skills/powerpoint-auto-subtitles `
 
 ## 完整流程
 
-**Agent 根据 PPT 生成字幕初稿 → 用户手动修改 → 将最终字幕交回 Agent → 估算并检查时间表 → 添加原生动画与自动翻页 → 导出 MP4 → 检查并交付。**
+**字幕准备（二选一：Agent 根据 PPT 起草 / 用户提供字幕，Agent 整理格式）→ 用户检查、修改并确认 → 将最终字幕交回 Agent → 估算并检查时间表 → 添加原生动画与自动翻页 → 导出 MP4 → 检查并交付。**
 
-## 第一步：让 Agent 生成字幕初稿，再手动修改
+## 第一步：准备字幕，再由用户检查确认
 
-不需要从空白模板开始写。先把 PPT 交给 Codex Agent，由它读取每页文字、图表和演讲者备注，自动起草逐页字幕，并整理成标准的 `captions.md`。然后打开这个文件，修改措辞、核对事实和数值，再进入视频制作。
+字幕准备有两种方式：没有现成字幕时，让 Agent 根据 PPT 起草；已有字幕时，提供给 Agent 整理格式。两条路径都输出标准的 `captions.md`，再由你检查、修改并确认，之后进入视频制作。
 
-**1. 向 Agent 提交字幕生成请求**
+### 路径 A：由 Agent 根据 PPT 起草字幕
 
 把下面的路径替换为实际文件：
 
@@ -71,7 +71,28 @@ PPT 文件：C:/work/my-presentation.pptx
 
 如果另有讲稿，可增加“参考讲稿：C:/work/notes.docx”。若讲稿与 PPT 冲突，要求 Agent 在核对记录中指出，不自行选择一个数值。
 
-**2. 打开 `captions.md`，手动修改**
+### 路径 B：用户提供字幕，Agent 整理格式
+
+已有 Word、TXT、Markdown 或聊天中的字幕内容时，不必让 Agent 重新起草。提供字幕和对应 PPT，让它统一页序与格式，并保留原文。
+
+```text
+请使用 $powerpoint-auto-subtitles，整理我提供的字幕，不重新起草。
+PPT 文件：C:/work/my-presentation.pptx
+用户字幕：C:/work/my-subtitles.docx（也可直接粘贴带页码的字幕）
+标准字幕输出：C:/work/captions.md（UTF-8，不覆盖原文件）
+核对记录：C:/work/captions-review.md
+按 PPT 实际页序整理为 ## Slide N，每条字幕使用一个 - 列表项。
+仅统一格式并核对页面对应关系，保留我的措辞、顺序、数值和单位。
+不要擅自翻译、润色或补充字幕；长段落需要拆分时保留原文顺序，
+涉及含义变化的修改只在核对记录中建议，不直接改写。
+缺页、页序不明确或与 PPT 内容冲突时，列出问题，不自行猜测。
+交付标准字幕和核对记录，等我手动检查、修改并确认后再制作视频。
+```
+
+若希望同时翻译或润色，请在请求中明确说明目标语言和修改范围。
+
+### 两条路径汇合：用户手动检查、修改并确认
+
 
 可以用记事本、VS Code 或其他文本编辑器直接编辑。核对每页是否对应、数值和单位是否正确；删除不想讲的内容，补充必要说明，调整英文措辞，并把过长字幕拆成几条。保存为 UTF-8，保留下面的结构：
 
@@ -95,9 +116,9 @@ PPT 文件：C:/work/my-presentation.pptx
 
 [标准模板](examples/captions.template.md) · [英文示例](examples/captions.en.md) · [中文格式示例](examples/captions.zh-CN.md)（供检查格式使用，不要求手动从头填写。）
 
-**3. 将修改后的字幕交回 Agent**
+### 将确认后的字幕交回 Agent
 
-完成修改后，使用下面第二步的请求，明确指定 `C:/work/captions.md` 为最终字幕来源。Agent 应保留你修改后的措辞，重新计算时间，而不是重新从 PPT 覆盖字幕稿。若只想从 PPT 一次性生成视频、跳过手动审稿，需要明确提出这一要求。
+检查、修改并确认后，使用下面第二步的请求，明确指定 `C:/work/captions.md` 为最终字幕来源。Agent 应保留你修改后的措辞，重新计算时间，而不是重新从 PPT 覆盖字幕稿。若只想从 PPT 一次性生成视频、跳过手动审稿，需要明确提出这一要求。
 
 ## 第二步：提交完整制作请求
 
@@ -106,7 +127,7 @@ PPT 文件：C:/work/my-presentation.pptx
 ```text
 请使用 $powerpoint-auto-subtitles。
 PPT 文件：C:/work/my-presentation.pptx
-字幕来源：C:/work/captions.md（我已手动修改的最终英文字幕）
+字幕来源：C:/work/captions.md（我已检查并确认的最终英文字幕）
 字幕语言：英文；保留我修改后的措辞，不重新生成或覆盖字幕稿。
 输出目录：C:/work/captioned-output
 配音：无；制作无声字幕视频。
