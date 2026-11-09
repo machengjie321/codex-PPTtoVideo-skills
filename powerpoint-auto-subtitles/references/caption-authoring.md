@@ -1,5 +1,9 @@
 # Generate captions and estimate timing
 
+## Start with the caption document
+
+First explain the standard input format below and help the user organize all slide captions into one UTF-8 Markdown/TXT file. The user supplies wording, not timestamps. For Word or loosely organized notes, preserve meaning and page associations while splitting paragraphs into cues. Ask for any unresolved mapping instead of assigning text to guessed pages. Translation requires an explicit language instruction. Keep non-caption directions outside the document. Deliver the normalized document and mapping check first when this is the requested stage; continue to timing/export only within the requested scope. Reject unfilled template placeholders before animation.
+
 ## Draft from the slides
 
 Read each slide, including its figures and intended takeaway. Draft short spoken-style explanations, not a verbatim copy of every label. Usually begin with what the audience sees, explain the important change or comparison, then state the takeaway. Use only supported claims and retain units and qualifications. Define an unfamiliar acronym on its first use. Match each cue to one visual state; split a dense sentence rather than speeding it up. The number of cues depends on the slide, not a fixed quota.

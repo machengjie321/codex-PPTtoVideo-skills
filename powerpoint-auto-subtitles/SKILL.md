@@ -17,6 +17,10 @@ For drafting captions from slides, accepting per-slide text or a document, and e
 
 Produce a UTF-8 timeline before animating. Read [the timeline contract](references/timeline.md) for the schema and timing formulas. A slide's position in the file (`slide_index`) can differ from its printed page number (`slide_number`). Neither nine slides nor 160 seconds is a universal default.
 
+## Caption-first intake
+
+Start a new subtitle workflow by helping the user provide captions in the standard per-slide format. Explain that `## Slide N` identifies the actual PPTX slide and every `- ` line is one cue. Accept a named caption file or pasted slide-labeled text. Normalize Word or unstructured drafts into a UTF-8 `captions.md` before computing timings. Keep visual directions and task instructions outside caption text. Check slide order, missing pages and unreplaced template placeholders. Do not invent missing captions when the user chose a supplied-script workflow; draft from the deck only when requested. If the user asks only to organize the caption document, deliver that document and mapping check without proceeding to animation/export. Reuse an already valid caption file instead of repeating intake.
+
 ## Workflow
 
 1. **Inspect and prepare the deck.** Preserve charts, tables, media, notes and existing design. Reserve a bottom caption band outside plot labels and video output. Reflow content first when needed. Adapt caption size to the actual slide dimensions. Keep captions to one or two lines.

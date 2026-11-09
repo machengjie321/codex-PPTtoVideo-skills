@@ -2,6 +2,54 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+## 第一步：先准备字幕文件
+
+先整理字幕，再生成动画时间表和视频。你不需要先填写秒数或 CSV。
+
+1. 按 PPT 的实际页序，写出每页希望观众看到的字幕。
+2. 每条字幕只讲一个意思，按播放顺序排列；一页可以有多条，不必固定数量。
+3. 将所有页面放入同一份文件，使用下面的标准格式，保存为 **UTF-8 编码的 `captions.md` 或 `captions.txt`**。
+4. 导出英文视频时，文件中应放最终英文字幕；如果只有中文草稿，请明确要求 Codex 翻译成英文后再整理。
+
+[下载并填写空白字幕模板](examples/captions.template.md) · [英文填写示例](examples/captions.en.md) · [中文格式示例](examples/captions.zh-CN.md)
+
+```text
+# Captions
+
+## Slide 1
+- This slide introduces the research platform.
+- The diagram shows its main components.
+
+## Slide 2
+- This slide compares the two processing paths.
+- The following animation explains the data flow.
+```
+
+**格式规则：**
+
+- `## Slide 1` 对应 PPT 文件中的第 1 页，从 1 连续编号，不是图上印刷的页码。
+- 每个 `- ` 开头的行是一条完整字幕，同一条不要手动换行。
+- 字幕区只写实际要显示的文字；备注、图片指令、阅读速度和总时长写在任务消息里。
+- 每页至少一条字幕；增删示例页面以匹配你的 PPT，替换模板中的全部方括号提示。
+- 不要先写时间戳。整理后由脚本根据字数估算，再检查可读性及总时长。
+
+**已有 Word、TXT 或零散文案时，先发这个请求：**
+
+```text
+请使用 $powerpoint-auto-subtitles，先只整理字幕文件，不导出视频。
+PPT：C:/work/my-presentation.pptx
+字幕草稿：C:/work/subtitle-draft.docx
+输出：C:/work/captions.md（UTF-8）
+按 PPT 实际页序整理，每页使用 ## Slide N，每条英文字幕使用一个 - 列表项。
+保留已有内容的含义、数值和单位，把长段落按意思拆成短字幕。
+若草稿是中文，请翻译成英文；不要补造缺页内容。
+核对页数和对应关系，列出无法匹配或缺失的页面。
+交付标准字幕文件及简短核对结果，暂不生成动画和 MP4。
+```
+
+将路径替换为实际文件，也可以直接粘贴带页码的草稿。页序不明确时先补齐对应关系。整理完成后，使用后文的导出请求，把 `captions.md` 明确指定为字幕来源。
+
+
 这个项目把“给 PPT 配字幕、设置自动播放、导出视频”的流程封装为一个 Codex Skill。
 
 **字幕使用 PPT 内部原生文本框和动画实现，PPTX 中的文字可以继续编辑。** Codex 先编排时间表，再调用桌面版 PowerPoint 添加淡入淡出和自动翻页，最后由 PowerPoint 导出 MP4。

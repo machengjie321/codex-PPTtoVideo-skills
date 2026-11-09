@@ -2,6 +2,54 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+## Step 1: Prepare the caption file first
+
+Organize the captions before generating animation timings or video. You do not need to supply timestamps or a CSV yet.
+
+1. Write the captions for each slide in the actual PPTX order.
+2. Keep one idea per cue and list cues in playback order. The number of cues can vary by slide.
+3. Put all slides in one **UTF-8 `captions.md` or `captions.txt`** using the format below.
+4. For an English video, supply final English captions, or explicitly ask Codex to translate your draft before formatting it.
+
+[Blank caption template](examples/captions.template.md) · [Completed English example](examples/captions.en.md) · [Chinese format example](examples/captions.zh-CN.md)
+
+```text
+# Captions
+
+## Slide 1
+- This slide introduces the research platform.
+- The diagram shows its main components.
+
+## Slide 2
+- This slide compares the two processing paths.
+- The following animation explains the data flow.
+```
+
+**Format rules:**
+
+- `## Slide 1` refers to the first slide in the file; number consecutively from 1, independently of printed page labels.
+- Every `- ` line is one complete cue. Do not insert a physical line break inside it.
+- Put only visible caption text in the document. Send visual directions, comments, reading speed and target duration separately in the task message.
+- Include at least one cue per slide. Add or remove template sections to match the deck and replace every bracketed placeholder.
+- Leave timestamps out. Generate estimates after formatting, then review readability and total duration.
+
+**If your draft is in Word, TXT or loosely organized notes, start with this request:**
+
+```text
+Use $powerpoint-auto-subtitles. Prepare the caption file only; do not export video yet.
+PPTX: C:/work/my-presentation.pptx
+Caption draft: C:/work/subtitle-draft.docx
+Output: C:/work/captions.md (UTF-8)
+Match the actual slide order. Use ## Slide N for each page and one - bullet per English cue.
+Preserve meaning, values and units. Split long paragraphs at natural idea boundaries.
+Translate a Chinese draft into English; do not invent content for missing pages.
+Check slide correspondence and list missing or ambiguous mappings.
+Deliver the normalized caption file and a short check report, without animations or MP4.
+```
+
+Replace the example paths with real files, or paste a draft labeled by slide. Resolve ambiguous page mappings first. Once the file is ready, use the export request later in this guide and explicitly name `captions.md` as the caption source.
+
+
 **Turn an editable PowerPoint into an automatically playing captioned video with Codex.**
 
 Codex prepares a subtitle timeline, adds native PowerPoint text boxes, applies Fade entrance and exit animations, sets automatic slide advance, and exports an MP4 through desktop Microsoft PowerPoint. The captions remain editable in the PPTX.
