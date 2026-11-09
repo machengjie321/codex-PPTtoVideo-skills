@@ -150,93 +150,71 @@ PPT 文件：C:/work/my-presentation.pptx
 
 若不需要固定总时长，将“目标总时长”改成“按字数估算，报告最终总时长”。160 秒不是强制默认值。
 
-## 第三步：生成字幕时间表
+## 第三步：Agent 生成并检查时间表
 
-默认英文每秒 **2.5 个单词**，中文每秒 **4 个汉字**；中英混排时分别计算后相加。每条另加 **0.4 秒阅读停顿**及淡入、淡出各 **0.25 秒**，最短显示 **2.5 秒**。
+提交第二步的完整请求后，以下制作与检查工作由 Agent 连续执行，你不需要逐条运行命令。
 
-```text
-字幕时长 = max(2.5, 英文单词数 / 2.5 + 汉字数 / 4 + 0.4 + 0.5)
-```
+Agent 读取确认后的 `captions.md`，生成 `timeline-estimated.csv`，记录每条字幕的起止时间和每页播放时长。默认按英文每秒 2.5 词、中文每秒 4 字估算，另加阅读停顿和淡入淡出时间；这些速度可以调整。有配音时按实际语音对齐。
 
-标点不计为汉字；英文缩写及数字按词计数。相邻字幕间隔默认 0.15 秒，每页最后留 0.5 秒。字多时延长的是停留时间，不是淡入淡出时间。超过 12 秒会提醒拆分，不会截断文字或强行加速。还需要检查实际文字是否能在字幕区域内清晰显示。
+Agent 检查预计总时长、字幕是否过长以及文字是否放得下。指定 160 秒等目标时，需要核对可读性与时长是否兼容；不能靠截断文字或强行加速凑时长。具体公式见 [计时规则](powerpoint-auto-subtitles/references/caption-authoring.md)。
 
-```powershell
-python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
-  ./examples/captions.zh-CN.md ./timeline-estimated.csv
+## 第四步：Agent 添加动画并导出
 
-# 技术内容可以放慢阅读速度：
-python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
-  ./examples/captions.zh-CN.md ./timeline-slower.csv `
-  --english-wps 2.0 --chinese-cps 3.2 --pause 0.7
-```
+Agent 使用 [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1)，依据时间表创建可编辑字幕文本框，添加原生 **淡入 → 停留 → 淡出** 动画，设置自动翻页，再由 PowerPoint 导出 MP4 和 PDF 预览。
 
-然后把生成的 CSV 传给 `add-subtitles-and-export.ps1` 的 `-TimelineCsv` 参数。文字转时间表这一步需要 Python 3，不能覆盖已存在的输出文件。示例字幕文档用于展示输入格式，并不是已发布 24 秒演示的原始字幕稿。
+原有图表、数值和可编辑图形需要保留。已有动画时，Agent 要有针对性地合并时间线；通用脚本不会自动合并已有动画，也不会自动重新排版图表。上方图形的同步变化需单独按字幕时间表编排。
 
-## 第四步：制作原生动画并导出
+## 第五步：Agent 检查视频并交付
 
-每条字幕都是独立文本框，动画顺序为：
+Agent 解码实际 MP4，检查真实总时长、每条字幕、翻页及部分淡入淡出边界，确认没有残影、重叠或遮挡。“导出成功”不是播放检查完成；抽帧工具也不会自动判断画面是否合格。
 
-**淡入 → 停留 → 淡出 → 下一条字幕**
-
-脚本通过 PowerPoint 的 `TimeLine.MainSequence.AddEffect` 创建原生 Fade 动画。字幕可以在 PPT 中直接修改；单独生成 SRT 文件不能替代这个动画过程。
-
-这里使用自动的 **After Previous（上一动画之后）** 顺序。设一条字幕开始时间为 `s`、结束时间为 `e`、淡入时长为 `fi`、淡出时长为 `fo`，上一条结束时间为 `p`：
-
-| 动画 | 触发方式 | 延迟 | 持续时间 |
-|---|---|---|---|
-| 淡入 | 上一动画之后 | `s - p` | `fi` |
-| 淡出 | 上一动画之后 | `e - s - fi - fo` | `fo` |
-
-首条字幕使用 `p = 0`。例如一条字幕共 4 秒，淡入和淡出分别为 0.25 秒，则中间停留 3.5 秒。下一条可紧接着开始，也可根据时间表留出空档。
-
-### 自动翻页并导出视频
-
-脚本设置每页自动播放时长，关闭点击翻页，并让 PowerPoint 按已有计时和动画调用 `CreateVideo` 导出 MP4。因此，无声演示也可以自动完整播放。
-
-## 第五步：检查并交付
-
-确认视频真实总时长，在每条字幕区间抽取画面，并额外检查部分淡入淡出和翻页边界。重点检查字幕是否正确消失、有无残影或重叠、是否遮住图表，以及翻页是否产生时间偏差。
-
-“时间表正确”或“导出状态成功”不代表播放效果一定正确。附带的抽帧脚本只负责解码、读取时长和生成待检查画面，不会自动判定视觉效果合格。
-
-完整交付包括：
-
-| 文件 | 用途 |
+| 交付文件 | 用途 |
 |---|---|
-| `captions.md` | 标准逐页字幕稿 |
-| `subtitle_timeline_FINAL.csv` | 最终字幕起止时间及翻页时间 |
+| `captions.md` | 用户确认后的标准字幕稿 |
+| `subtitle_timeline_FINAL.csv` | 最终字幕起止时间及每页时长 |
 | 字幕版 `.pptx` | 可编辑字幕、原生动画及自动翻页 |
 | `.mp4` | 实际自动播放视频 |
 | `.pdf` | 静态预览，每页展示首条字幕 |
 | QA 记录 | 实际时长、字幕与图形同步检查、已知限制 |
 
-字幕文件只是中间产物；完整制作任务以视频导出及实际播放检查完成为终点。只有明确要求“仅整理字幕”时，才在第一阶段结束。
+**使用 Codex 的完整流程到这里结束。下面的附录仅供希望自己运行程序的人使用，不是额外需要重复执行的步骤。**
 
-## 直接运行脚本
+## 可选附录：手动运行脚本
 
-按照 [CSV 格式说明](powerpoint-auto-subtitles/references/timeline.md) 准备时间表后运行：
+这是上述制作过程的命令行替代方式。先完成字幕确认，在仓库根目录打开 PowerShell，准备 `C:/work/my-presentation.pptx` 和 `C:/work/captions.md`。需要 Python 3、PowerShell 7 和 Windows 桌面版 PowerPoint。以下输出路径必须尚未存在，重新运行时换用新路径。
 
-```powershell
-pwsh -NoProfile -File ./powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1 `
-  -InputPptx ./my-presentation.pptx `
-  -TimelineCsv ./timeline.csv `
-  -OutputDirectory ./captioned-output
-```
-
-脚本输出新 PPTX、MP4、PDF、逐页 PNG、最终 CSV 和执行记录，不覆盖原文件。执行记录会将实际视频检查标记为待完成，直到人工或 Codex 真正检查了解码结果。
-
-该辅助脚本遇到已有动画或字幕对象会停止，避免清空原有播放逻辑。已有复杂动画时，请让 Codex 有针对性地合并时间线。字幕区域也需要先准备好，脚本不会自动重新排版原图表。
-
-抽取视频检查帧：
+### A. 字幕文件 → 时间表
 
 ```powershell
-pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-frames.ps1 `
-  -VideoPath ./captioned-output/my-presentation_review.mp4 `
-  -TimelineCsv ./captioned-output/subtitle_timeline_FINAL.csv `
-  -OutputDirectory ./video-check
+python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py C:/work/captions.md C:/work/timeline-estimated.csv
 ```
 
-更多内容见 [英文 Skill](powerpoint-auto-subtitles/SKILL.md)、[英文流程介绍](powerpoint-auto-subtitles/references/workflow-walkthrough.md) 和 [PowerPoint 实现与检查说明](powerpoint-auto-subtitles/references/office-workflow.md)。
+输入是最终字幕，输出是估算的 CSV。默认公式：
 
-编辑模式中，多条字幕文本框可能叠放在同一区域；播放时由动画控制出现与消失。静态 PDF 和 PNG 每页只展示首条字幕。
+```text
+字幕时长 = max(2.5, 英文词数 / 2.5 + 汉字数 / 4 + 0.4 + 0.25 + 0.25)
+```
 
+相邻字幕间隔 0.15 秒，每页末尾留 0.5 秒；超过 12 秒会提示拆分，不自动截断。需要放慢时，可在同一命令末尾添加 `--english-wps 2.0 --chinese-cps 3.2 --pause 0.7`。
+
+检查生成的时间表后再进入 B。这个脚本只按字数估时，**不会自动把总时长调整为 160 秒**。有固定时长要求时，需要先合理调整文案或时间表并检查可读性。CSV 字段见 [格式说明](powerpoint-auto-subtitles/references/timeline.md)。
+
+### B. PPT + 时间表 → 原生动画、MP4 和 PDF
+
+```powershell
+pwsh -NoProfile -File ./powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1 -InputPptx C:/work/my-presentation.pptx -TimelineCsv C:/work/timeline-estimated.csv -OutputDirectory C:/work/captioned-output
+```
+
+这里直接使用 A 生成的同一个 CSV。脚本创建原生 Fade 动画和自动翻页，并输出 `my-presentation_captioned.pptx`、`my-presentation_review.mp4`、`my-presentation_preview.pdf`、逐页 PNG、`subtitle_timeline_FINAL.csv` 和执行记录。源 PPT 不会被覆盖。
+
+脚本遇到已有动画或字幕对象会停止；这种情况需要有针对性地合并，不要清空原有动画。执行记录中的视频检查状态此时仍为待完成。
+
+### C. 实际 MP4 → 检查帧与 QA 记录
+
+```powershell
+pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-frames.ps1 -VideoPath C:/work/captioned-output/my-presentation_review.mp4 -TimelineCsv C:/work/captioned-output/subtitle_timeline_FINAL.csv -OutputDirectory C:/work/video-check
+```
+
+这里使用 B 导出的视频及最终 CSV。打开抽取的画面逐条检查，再播放翻页和淡入淡出附近片段，记录实际总时长与发现的问题，完成 QA 记录。抽帧成功本身不等于视觉验证通过。
+
+更多实现细节见 [动画计时公式](powerpoint-auto-subtitles/references/timeline.md)、[PowerPoint 实现与检查说明](powerpoint-auto-subtitles/references/office-workflow.md) 和 [Skill](powerpoint-auto-subtitles/SKILL.md)。编辑模式中字幕可能叠放，播放时由动画控制可见性。

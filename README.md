@@ -155,82 +155,71 @@ Without a draft, replace the caption-source line with:
 
 Without a fixed duration requirement, replace the target with “Estimate from text length and report the final duration.”
 
-## Step 3: Generate the caption timeline
+## Step 3: The Agent generates and checks the timeline
 
-Defaults: English **2.5 words/s**, Chinese **4 characters/s**, plus **0.4 s** reading pause and **0.25 s** for each fade. A cue lasts at least **2.5 s**. Mixed-language text adds the two reading times. These are adjustable estimates; narration uses actual speech timing.
+After the complete request in Step 2, the Agent performs production and verification in sequence. You do not need to run individual commands.
+
+The Agent reads your confirmed `captions.md` and creates `timeline-estimated.csv` with cue boundaries and slide durations. Defaults are 2.5 English words/s and 4 Chinese characters/s, plus reading pauses and fades. Rates are adjustable; actual narration takes priority over estimates.
+
+The Agent checks total duration, long cues and text fit. A target such as 160 seconds must be compatible with readability, not achieved by truncating captions or forcing an unreadable pace. See [timing rules](powerpoint-auto-subtitles/references/caption-authoring.md) for the formula.
+
+## Step 4: The Agent animates and exports
+
+The Agent uses [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1) to create editable caption boxes from the timeline, apply native **fade in → hold → fade out** effects, set automatic slide advance, and export MP4 and PDF through PowerPoint.
+
+Preserve existing charts, values and editable shapes. Existing animations need deliberate timeline merging: the general helper does not merge them or rearrange charts automatically. Synchronized diagram changes require separate scene authoring against the same timeline.
+
+## Step 5: The Agent verifies and delivers
+
+The Agent decodes the actual MP4 and checks its duration, every caption, slide transitions and selected fade boundaries for residual text, overlaps and obstruction. Successful export is not playback verification, and the frame extractor does not judge visual quality automatically.
+
+| Deliverable | Purpose |
+|---|---|
+| `captions.md` | User-confirmed caption script |
+| `subtitle_timeline_FINAL.csv` | Final cue boundaries and slide durations |
+| Captioned `.pptx` | Editable captions, native animation and automatic advance |
+| `.mp4` | Actual automatically playing video |
+| `.pdf` | Static preview with the first caption on each slide |
+| QA notes | Actual duration, caption/diagram checks and limitations |
+
+**The Codex-assisted workflow ends here. The appendix is an alternative for people who want to run the programs themselves, not another set of required steps.**
+
+## Optional appendix: Run the scripts manually
+
+This is the command-line alternative to the production workflow above. First confirm your captions. Open PowerShell at the repository root with `C:/work/my-presentation.pptx` and `C:/work/captions.md` ready. You need Python 3, PowerShell 7 and desktop PowerPoint on Windows. The output paths below must not already exist; choose fresh paths for another run.
+
+### A. Caption document → timeline
+
+```powershell
+python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py C:/work/captions.md C:/work/timeline-estimated.csv
+```
+
+This reads the final captions and produces an estimated CSV. Default formula:
 
 ```text
-cue duration = max(2.5, English words / 2.5 + Chinese characters / 4 + 0.4 + 0.5)
+cue duration = max(2.5, English words / 2.5 + Chinese characters / 4 + 0.4 + 0.25 + 0.25)
 ```
 
-Longer text gets a longer hold time. The gap is 0.15 s between cues and the final slide hold is 0.5 s. No long caption is silently truncated; split dense captions for readability.
+Cues have a 0.15-second gap; slides have a 0.5-second tail. Cues over 12 seconds trigger a splitting suggestion without truncation. To slow the pace, append `--english-wps 2.0 --chinese-cps 3.2 --pause 0.7` to the command.
+
+Review the timeline before B. This script estimates from text length; **it does not automatically fit a 160-second target**. A fixed duration requires appropriate script/timeline adjustments and readability checks. See the [CSV contract](powerpoint-auto-subtitles/references/timeline.md).
+
+### B. PPTX + timeline → native animation, MP4 and PDF
 
 ```powershell
-python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
-  ./examples/captions.en.md ./timeline-estimated.csv
+pwsh -NoProfile -File ./powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1 -InputPptx C:/work/my-presentation.pptx -TimelineCsv C:/work/timeline-estimated.csv -OutputDirectory C:/work/captioned-output
 ```
 
-Then pass `timeline-estimated.csv` to the PowerPoint helper below. Python 3 is required for this optional conversion step. Review the total duration and align any diagram animations to the generated timeline.
+This uses the same CSV produced in A. It creates native Fade effects and automatic slide advance, then outputs `my-presentation_captioned.pptx`, `my-presentation_review.mp4`, `my-presentation_preview.pdf`, slide PNGs, `subtitle_timeline_FINAL.csv` and an automation report. The source deck is preserved.
 
-## Step 4: Animate and export
+The helper stops on existing animations or caption objects; merge those deliberately instead of clearing them. Video verification in the report remains pending at this point.
 
-Each subtitle is a separate editable text box. Its animation sequence is:
-
-**Fade in → hold → fade out → next caption**
-
-The helper uses PowerPoint's native `TimeLine.MainSequence.AddEffect` API and the Fade effect. It does not burn text into slide images or substitute an SRT file for PowerPoint animation.
-
-For a caption starting at `s`, ending at `e`, with entrance duration `fi`, exit duration `fo`, and previous caption end `p`:
-
-| Effect | Start mode | Delay | Duration |
-|---|---|---|---|
-| Entrance | After Previous | `s - p` | `fi` |
-| Exit | After Previous | `e - s - fi - fo` | `fo` |
-
-The first caption uses `p = 0`. With `fi = fo = 0.25 s`, a 4-second cue holds for 3.5 seconds. This makes the exit finish at the scheduled cue end. The helper also supports intentional gaps between cues.
-
-### Export with stored slide timings
-
-The helper enables timed slide advance and disables click-to-advance. PowerPoint's `CreateVideo` exports the presentation using its stored timings and animations. No clicks or voice-over are required for a silent demonstration.
-
-## Step 5: Verify and deliver
-
-Check the duration of the real MP4 and inspect a decoded frame inside every caption interval. Also inspect selected fades and slide boundaries. Look for text that fails to disappear, overlapping captions, timing drift, and captions covering charts or video output.
-
-An export-success status or a valid timeline CSV alone does not prove correct playback. The optional extraction helper reports media duration and produces frames for inspection; it does not automatically certify the result.
-
-Deliver the normalized `captions.md`, final timing CSV, editable animated PPTX, actual MP4, static PDF preview and short QA notes covering decoded duration, caption/visual synchronization and remaining limitations. The caption document is an intermediate artifact. A complete production request ends after video export and playback verification; stop after document preparation only when explicitly requested.
-
-## Run the helper directly
-
-Prepare a timeline following [the CSV contract](powerpoint-auto-subtitles/references/timeline.md), then run:
+### C. Actual MP4 → inspection frames and QA notes
 
 ```powershell
-pwsh -NoProfile -File ./powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1 `
-  -InputPptx ./my-presentation.pptx `
-  -TimelineCsv ./timeline.csv `
-  -OutputDirectory ./captioned-output
+pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-frames.ps1 -VideoPath C:/work/captioned-output/my-presentation_review.mp4 -TimelineCsv C:/work/captioned-output/subtitle_timeline_FINAL.csv -OutputDirectory C:/work/video-check
 ```
 
-Outputs include an animated PPTX, MP4, PDF, per-slide PNGs, final timeline CSV, and an automation report. The report deliberately leaves actual playback verification pending until the video has been inspected. The source deck is not overwritten.
+This uses the MP4 and final CSV from B. Inspect every extracted image, play the transition and fade intervals, and record actual duration and any issues in your QA notes. Successful extraction alone is not visual validation.
 
-The helper refuses existing animation sequences or caption objects. For an already animated deck, ask Codex to preserve and merge its timeline deliberately. Reserve the caption area before running the helper; it does not automatically rearrange existing charts and tables.
-
-To extract verification frames:
-
-```powershell
-pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-frames.ps1 `
-  -VideoPath ./captioned-output/my-presentation_review.mp4 `
-  -TimelineCsv ./captioned-output/subtitle_timeline_FINAL.csv `
-  -OutputDirectory ./video-check
-```
-
-## Further explanation
-
-- [English walkthrough and short presentation script](powerpoint-auto-subtitles/references/workflow-walkthrough.md)
-- [Timeline fields and timing formulas](powerpoint-auto-subtitles/references/timeline.md)
-- [Office implementation, export and QA notes](powerpoint-auto-subtitles/references/office-workflow.md)
-- [Skill instructions](powerpoint-auto-subtitles/SKILL.md)
-
-Captions overlap in normal editing view because they share the same safe band. Their native animations control visibility during playback. The static PDF/PNGs show only the first caption on each slide.
-
+Further details: [animation timing formulas](powerpoint-auto-subtitles/references/timeline.md), [Office implementation and QA](powerpoint-auto-subtitles/references/office-workflow.md), and [Skill instructions](powerpoint-auto-subtitles/SKILL.md). Captions can overlap in editing view; native animation controls visibility during playback.
