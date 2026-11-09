@@ -6,6 +6,44 @@
 
 Codex prepares a subtitle timeline, adds native PowerPoint text boxes, applies Fade entrance and exit animations, sets automatic slide advance, and exports an MP4 through desktop Microsoft PowerPoint. The captions remain editable in the PPTX.
 
+## How the system works
+
+The Skill supplies instructions and scripts, while the Codex Agent coordinates the workflow. The Agent interprets slide content and prepares captions and layout; scripts calculate timing, create animation and export files; desktop PowerPoint performs the actual playback and video rendering.
+
+```mermaid
+flowchart TD
+    A[Original PPTX] --> B[Agent drafts or normalizes captions]
+    U[User captions or script] --> B
+    B --> C[captions.md: user edits and confirms]
+    A --> D[Agent standardizes layout and reserves caption space]
+    C --> D
+    D --> E[Layout PPTX and previews: user confirms]
+    C --> F[Generate and check the final-text timeline]
+    E --> G[PowerPoint creates editable captions and native effects]
+    F --> G
+    G --> H[Set automatic advance and save animated PPTX]
+    H --> I[PowerPoint exports MP4 and static PDF]
+    I --> J[Agent verifies the actual video and delivers]
+```
+
+### Files and programs in the pipeline
+
+| Stage | Input → output | Implementation |
+|---|---|---|
+| Content preparation | PPTX / supplied captions → `captions.md` | Agent drafts or normalizes each slide; user confirms the wording |
+| Layout preparation | Original PPTX + final captions → layout PPTX | Agent reserves a consistent bottom caption area; user reviews previews |
+| Timing | `captions.md` → `timeline-estimated.csv` | [captions-to-timeline.py](powerpoint-auto-subtitles/scripts/captions-to-timeline.py) estimates reading durations; Agent checks total time and readability |
+| Animation and export | Layout PPTX + timeline → animated PPTX, MP4, PDF and final CSV | [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1) creates text boxes and effects through the Windows PowerPoint COM object model and invokes PowerPoint export |
+| Playback verification | Actual MP4 + final CSV → inspection frames and QA notes | [extract-video-frames.ps1](powerpoint-auto-subtitles/scripts/extract-video-frames.ps1) decodes frames; Agent reviews captions, transitions and actual duration |
+
+### What makes the captions play automatically
+
+Each caption is an editable text box. The script calls `TimeLine.MainSequence.AddEffect` to add native **Fade entrance and exit effects**, triggered automatically **After Previous**. The timeline determines appearance, hold time and disappearance; each slide's `AdvanceTime` controls automatic slide advance.
+
+The PPTX retains the text boxes and animations. PowerPoint's `CreateVideo` renders the stored effects and timings into MP4, so the caption changes come from native presentation playback. The PDF is a static preview and does not play animations.
+
+The general helper animates captions. The demo's two changing upper diagrams use additional choreography in [animate-two-panels.ps1](examples/animate-two-panels.ps1): each scene's diagrams and caption are grouped and faded together. Existing complex animations require deliberate merging by the Agent, not removal.
+
 ## Demo and downloads
 
 ![Animated subtitle playback](media/subtitle-playback.gif)

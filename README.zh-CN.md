@@ -6,6 +6,44 @@
 
 **字幕使用 PPT 内部原生文本框和动画实现，PPTX 中的文字可以继续编辑。** Codex 先编排时间表，再调用桌面版 PowerPoint 添加淡入淡出和自动翻页，最后由 PowerPoint 导出 MP4。
 
+## 整体实现逻辑
+
+这个 Skill 提供操作规则和脚本，由 Codex Agent 串联整个流程。Agent 负责理解内容、整理字幕和版式；脚本负责计算时间、创建动画及导出；桌面版 PowerPoint 负责实际播放和视频渲染。
+
+```mermaid
+flowchart TD
+    A[原始 PPT] --> B[Agent 起草字幕或整理用户字幕]
+    U[用户提供的字幕或讲稿] --> B
+    B --> C[captions.md：用户修改并确认]
+    A --> D[Agent 统一版式并预留底部字幕区]
+    C --> D
+    D --> E[排版 PPT 与预览：用户检查确认]
+    C --> F[根据最终字幕生成并检查时间表]
+    E --> G[PowerPoint 创建可编辑字幕与原生动画]
+    F --> G
+    G --> H[设置自动翻页并保存动画 PPTX]
+    H --> I[PowerPoint 导出 MP4 与静态 PDF]
+    I --> J[Agent 检查实际视频并交付]
+```
+
+### 文件和程序如何衔接
+
+| 环节 | 输入 → 输出 | 实现方式 |
+|---|---|---|
+| 内容准备 | PPT / 用户字幕 → `captions.md` | Agent 逐页起草或整理，用户确认最终措辞 |
+| 版式准备 | 原始 PPT + 最终字幕 → 排版 PPT | Agent 调整内容位置、统一底部字幕区，用户检查预览 |
+| 时间编排 | `captions.md` → `timeline-estimated.csv` | [captions-to-timeline.py](powerpoint-auto-subtitles/scripts/captions-to-timeline.py) 按阅读速度估算字幕时长；Agent 检查总时长与可读性 |
+| 动画与导出 | 排版 PPT + 时间表 → 动画 PPTX、MP4、PDF、最终 CSV | [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1) 通过 Windows PowerPoint COM 对象模型创建文本框和动画，调用 PowerPoint 导出 |
+| 播放检查 | 实际 MP4 + 最终 CSV → 检查帧和 QA 记录 | [extract-video-frames.ps1](powerpoint-auto-subtitles/scripts/extract-video-frames.ps1) 解码抽帧；Agent 检查字幕、翻页与实际时长 |
+
+### 为什么字幕会自动播放
+
+每条字幕对应一个可编辑文本框。脚本通过 `TimeLine.MainSequence.AddEffect` 添加 **Fade 淡入和淡出**，并使用 **After Previous（上一动画之后）** 自动触发。时间表决定何时出现、停留多久、何时消失；每页的 `AdvanceTime` 决定何时自动翻页。
+
+最终 PPTX 保留这些文本框和动画。PowerPoint 的 `CreateVideo` 按保存的动画与计时渲染 MP4，因此视频里的字幕变化来自 PPT 原生播放过程。PDF 只提供静态预览，不播放动画。
+
+通用脚本负责字幕动画；演示中上方两幅图的同步变化由 [animate-two-panels.ps1](examples/animate-two-panels.ps1) 额外编排：将同一时段的图形与字幕编组，对整组应用淡入淡出。已有复杂动画需要 Agent 有针对性地合并，不能直接清空。
+
 ## 演示与下载
 
 ![字幕自动播放效果](media/subtitle-playback.gif)
