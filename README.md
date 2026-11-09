@@ -46,7 +46,7 @@ Refresh the available skills or start a new Codex chat if the new skill is not l
 
 ## Complete workflow
 
-**Prepare captions (choose: Agent drafts from PPTX / user supplies captions and Agent normalizes the format) → user reviews, edits and confirms → Agent receives final captions → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
+**Prepare captions (choose: Agent drafts from PPTX / user supplies captions and Agent normalizes the format) → user reviews, edits and confirms → Agent prepares the caption area → user confirms the layout → confirmed PPTX and captions → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
 
 ## Step 1: Prepare captions, then review and confirm
 
@@ -122,15 +122,42 @@ Use Notepad, VS Code or another text editor. Check slide correspondence, values 
 
 ### Return the confirmed captions to the Agent
 
-After reviewing, editing and confirming, use the Step 2 request below and name `C:/work/captions.md` as the final caption source. The Agent should retain your edited wording and recalculate timing, not replace your script with a fresh draft from the deck. Explicitly request a one-pass workflow if you want to skip manual review.
+After reviewing, editing and confirming, complete the layout review in Step 2, then use the Step 3 request below and name `C:/work/captions.md` as the final caption source. The Agent should retain your edited wording and recalculate timing, not replace your script with a fresh draft from the deck. Explicitly request a one-pass workflow if you want to skip manual review.
 
-## Step 2: Submit the complete production request
+## Step 2: Have the Agent prepare a consistent caption area, then review it
+
+Before adding captions, ask the Agent to standardize the bottom caption area across slides. Start with roughly **10%–15% of slide height**, then adjust to the actual font size, line count and content; this is not a fixed requirement. Leave separation from the body content and keep axes, figure captions, page numbers and logos unobstructed.
+
+Preserve the existing visual style while aligning caption-area height, margins and text styling. Move or moderately resize body content when necessary. Do not hide content behind white rectangles or alter measured values. Reposition existing footers appropriately and flag crowded pages in the review notes.
+
+Submit this layout request first:
+
+```text
+Use $powerpoint-auto-subtitles to prepare the slide layout and bottom caption area.
+PPTX: C:/work/my-presentation.pptx
+Final captions: C:/work/captions.md
+Layout output directory: C:/work/layout-review
+Reserve a consistent bottom caption safe area based on the actual captions.
+Start around 10%–15% of slide height, adjust as needed, and separate it from body content.
+Standardize placement, margins and suggested font size while retaining the visual style.
+Reposition or resize body content as needed; preserve measured values, charts,
+editable shapes and existing animations. Do not obscure or remove axes, figure captions,
+page numbers or logos. Preserve the source file.
+Deliver editable presentation-layout.pptx, PDF/per-slide previews and layout review notes.
+Show each slide's longest caption in the review previews to check two-line text fit;
+do not leave preview placeholders in the PPTX that will receive the real captions.
+Do not add final caption animations or export video yet. Wait for my layout confirmation.
+```
+
+**User review:** Check every slide for clipping, overly reduced content, complete chart labels, consistent bottom spacing and readable longest captions. Ask the Agent to revise the previews if needed. After confirmation, use `C:/work/layout-review/presentation-layout.pptx` as the next input instead of the unformatted original.
+
+## Step 3: Submit the complete production request
 
 Replace the example paths with actual existing files and a new output folder. This example uses the caption document you manually edited in Step 1. An attachment can replace a path if identified by its exact filename. If using audio, give its path and request alignment to that recording.
 
 ```text
 Use $powerpoint-auto-subtitles.
-PPTX: C:/work/my-presentation.pptx
+PPTX: C:/work/layout-review/presentation-layout.pptx (layout and caption area confirmed)
 Caption source: C:/work/captions.md (my reviewed and confirmed final English captions)
 Caption language: English. Preserve my edited wording; do not regenerate or overwrite the script.
 Output directory: C:/work/captioned-output
@@ -155,21 +182,21 @@ Without a draft, replace the caption-source line with:
 
 Without a fixed duration requirement, replace the target with “Estimate from text length and report the final duration.”
 
-### 2.1 The Agent generates and checks the timeline
+### 3.1 The Agent generates and checks the timeline
 
-After the complete request in Step 2, the Agent performs production and verification in sequence. You do not need to run individual commands.
+After the complete request in Step 3, the Agent performs production and verification in sequence. You do not need to run individual commands.
 
 The Agent reads your confirmed `captions.md` and creates `timeline-estimated.csv` with cue boundaries and slide durations. Defaults are 2.5 English words/s and 4 Chinese characters/s, plus reading pauses and fades. Rates are adjustable; actual narration takes priority over estimates.
 
 The Agent checks total duration, long cues and text fit. A target such as 160 seconds must be compatible with readability, not achieved by truncating captions or forcing an unreadable pace. See [timing rules](powerpoint-auto-subtitles/references/caption-authoring.md) for the formula.
 
-### 2.2 The Agent animates and exports
+### 3.2 The Agent animates and exports
 
 The Agent uses [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1) to create editable caption boxes from the timeline, apply native **fade in → hold → fade out** effects, set automatic slide advance, and export MP4 and PDF through PowerPoint.
 
 Preserve existing charts, values and editable shapes. Existing animations need deliberate timeline merging: the general helper does not merge them or rearrange charts automatically. Synchronized diagram changes require separate scene authoring against the same timeline.
 
-### 2.3 The Agent verifies and delivers
+### 3.3 The Agent verifies and delivers
 
 The Agent decodes the actual MP4 and checks its duration, every caption, slide transitions and selected fade boundaries for residual text, overlaps and obstruction. Successful export is not playback verification, and the frame extractor does not judge visual quality automatically.
 
@@ -186,7 +213,7 @@ The Agent decodes the actual MP4 and checks its duration, every caption, slide t
 
 ## Optional appendix: Run the scripts manually
 
-This is the command-line alternative to the production workflow above. First confirm your captions. Open PowerShell at the repository root with `C:/work/my-presentation.pptx` and `C:/work/captions.md` ready. You need Python 3, PowerShell 7 and desktop PowerPoint on Windows. The output paths below must not already exist; choose fresh paths for another run.
+This is the command-line alternative to the production workflow above. First confirm your captions and layout, and ensure the input PPTX below already has a reserved caption area. Open PowerShell at the repository root with `C:/work/my-presentation.pptx` and `C:/work/captions.md` ready. You need Python 3, PowerShell 7 and desktop PowerPoint on Windows. The output paths below must not already exist; choose fresh paths for another run.
 
 ### A. Caption document → timeline
 
