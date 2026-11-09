@@ -11,6 +11,8 @@ Turn an existing local PPTX into an editable captioned presentation and a video.
 
 Identify the source PPTX, desired total duration, caption language, and any real media to include. Reuse supplied assets and measured values. If no audio is supplied, write concise captions from the slide content; do not describe this as speech transcription. When audio exists, align captions to the actual narration.
 
+For drafting captions from slides, accepting per-slide text or a document, and estimating timing from text length, read [caption authoring and timing](references/caption-authoring.md). The included `scripts/captions-to-timeline.py` converts normalized Markdown/TXT to the animation CSV with adjustable English-word and Chinese-character reading rates. Use actual speech timings when narration exists.
+
 Produce a UTF-8 timeline before animating. Read [the timeline contract](references/timeline.md) for the schema and timing formulas. A slide's position in the file (`slide_index`) can differ from its printed page number (`slide_number`). Neither nine slides nor 160 seconds is a universal default.
 
 ## Workflow

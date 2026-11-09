@@ -137,3 +137,57 @@ pwsh -NoProfile -Sta -File ./powerpoint-auto-subtitles/scripts/extract-video-fra
 ## 两幅同步变化的示意图
 
 上方左图展示幻灯片内容逐步出现，右图展示视频播放与字幕时间轴推进；下方字幕同步切换。演示将每个时段的两幅图与可编辑字幕编为一组，再添加 PowerPoint 原生淡入/淡出动画。此演示使用专门的场景编排，通用字幕脚本仍只负责字幕，不会自动改写已有图形动画。PPTX 中未嵌入录屏或预渲染 GIF。
+
+## 如何生成和输入逐页字幕
+
+可以直接在聊天中粘贴，也可以把所有页面写进一份 Markdown、TXT 或 Word 文档。没有字幕稿时，可以让 Codex 根据 PPT 起草：先介绍画面，再解释关键变化或对比，最后给出结论。每条只表达一个意思，不要把所有图表标签都照抄进去，也不能补造数据。
+
+```text
+## Slide 1
+- 先介绍这一页的核心内容。
+- 图形变化时，说明下一步。
+
+## Slide 2
+- 解释这一页最重要的对比。
+- 用一句话总结结论。
+```
+
+每个 `- ` 行是一条字幕，`Slide N` 是 PPT 文件中的页序，必须从 1 连续编号。Word 文档由 Codex 先提取为这个格式的 UTF-8 Markdown/TXT，脚本不直接解析 Word。每条字幕写在同一行，不使用嵌套列表。
+
+- [英文模板](examples/captions.en.md)
+- [中文模板](examples/captions.zh-CN.md)
+- [完整格式与计时规则（英文）](powerpoint-auto-subtitles/references/caption-authoring.md)
+
+### 按字数估算动画时间
+
+默认英文每秒 **2.5 个单词**，中文每秒 **4 个汉字**；中英混排时分别计算后相加。每条另加 **0.4 秒阅读停顿**及淡入、淡出各 **0.25 秒**，最短显示 **2.5 秒**。
+
+```text
+字幕时长 = max(2.5, 英文单词数 / 2.5 + 汉字数 / 4 + 0.4 + 0.5)
+```
+
+标点不计为汉字；英文缩写及数字按词计数。相邻字幕间隔默认 0.15 秒，每页最后留 0.5 秒。字多时延长的是停留时间，不是淡入淡出时间。超过 12 秒会提醒拆分，不会截断文字或强行加速。还需要检查实际文字是否能在字幕区域内清晰显示。
+
+```powershell
+python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
+  ./examples/captions.zh-CN.md ./timeline-estimated.csv
+
+# 技术内容可以放慢阅读速度：
+python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
+  ./examples/captions.zh-CN.md ./timeline-slower.csv `
+  --english-wps 2.0 --chinese-cps 3.2 --pause 0.7
+```
+
+然后把生成的 CSV 传给 `add-subtitles-and-export.ps1` 的 `-TimelineCsv` 参数。文字转时间表这一步需要 Python 3，不能覆盖已存在的输出文件。示例字幕文档用于展示输入格式，并不是已发布 24 秒演示的原始字幕稿。
+
+可以这样向 Codex 提要求：
+
+```text
+使用 $powerpoint-auto-subtitles，读取我的 PPT，按页起草英文字幕，
+每条只表达一个意思。以 ## Slide N 为标题、每条字幕一行列表，
+保存为 captions.md。按英文每秒 2.5 词估算时间并生成 CSV，
+让上方图形变化与最终字幕时间同步。导出可编辑 PPT 和 MP4，
+检查实际视频的字幕切换、图形同步和总时长。
+```
+
+这些速度是可调的初始估算，不是实测阅读速度。有配音时优先使用真实语音时间。要求固定总时长时，先调整文案，不能一味压缩显示时间。通用脚本只添加字幕；图形动画需单独按最终时间表编排。

@@ -26,6 +26,53 @@ The public example contains three generic slides, nine captions, and 24 seconds 
 
 The upper half now contains two changing diagrams: an editable slide builds up on the left, while a video player and cue timeline advance on the right. Both change with the bottom caption. The demo groups each pair of diagram states with its editable caption and applies native Fade entrance/exit effects to that group. This explicit scene choreography is separate from the general caption-only helper. No screen recording or pre-rendered GIF is embedded in the PPTX.
 
+## Write captions page by page
+
+You can paste the captions into Codex or put all pages in one Markdown, TXT or Word document. Codex can also draft captions from your PPT: introduce the visual, explain the key point, and finish with the takeaway. Keep each cue focused on one idea and preserve the slide's facts and units.
+
+```text
+## Slide 1
+- Introduce the main idea on this slide.
+- Explain the next diagram state.
+
+## Slide 2
+- State the key comparison.
+- Finish with the takeaway.
+```
+
+Each bullet is one subtitle. `Slide N` means its position in the PPTX. Word files are first converted to this UTF-8 Markdown/TXT format by Codex; the script does not directly parse Word files.
+
+- [English caption template](examples/captions.en.md)
+- [Chinese caption template](examples/captions.zh-CN.md)
+- [Full writing, input-format and timing guide](powerpoint-auto-subtitles/references/caption-authoring.md)
+
+### Automatic duration from text length
+
+Defaults: English **2.5 words/s**, Chinese **4 characters/s**, plus **0.4 s** reading pause and **0.25 s** for each fade. A cue lasts at least **2.5 s**. Mixed-language text adds the two reading times. These are adjustable estimates; narration uses actual speech timing.
+
+```text
+cue duration = max(2.5, English words / 2.5 + Chinese characters / 4 + 0.4 + 0.5)
+```
+
+Longer text gets a longer hold time. The gap is 0.15 s between cues and the final slide hold is 0.5 s. No long caption is silently truncated; split dense captions for readability.
+
+```powershell
+python ./powerpoint-auto-subtitles/scripts/captions-to-timeline.py `
+  ./examples/captions.en.md ./timeline-estimated.csv
+```
+
+Then pass `timeline-estimated.csv` to the PowerPoint helper below. Python 3 is required for this optional conversion step. Review the total duration and align any diagram animations to the generated timeline.
+
+Example Codex request:
+
+```text
+Use $powerpoint-auto-subtitles. Read my PPT and draft English captions
+page by page, with one idea per cue. Save them as captions.md using
+## Slide N headings and one bullet per caption. Estimate timing at
+2.5 words/s, generate the CSV, and synchronize the diagram changes with
+the final cues. Export the editable PPTX and MP4, then verify playback.
+```
+
 ## How it works
 
 ```mermaid
