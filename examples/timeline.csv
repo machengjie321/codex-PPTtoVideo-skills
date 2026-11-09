@@ -1,0 +1,10 @@
+slide_index,slide_number,slide_duration_s,caption_id,local_start_s,local_end_s,fade_in_s,fade_out_s,text
+1,1,8,CAPTION_S01_01,0,2.5,0.25,0.25,Codex turns slide content into a timed caption plan.
+1,1,8,CAPTION_S01_02,2.5,5,0.25,0.25,Every subtitle stays editable inside PowerPoint.
+1,1,8,CAPTION_S01_03,5,8,0.25,0.25,PowerPoint exports the automatic presentation as a video.
+2,2,8,CAPTION_S02_01,0,2.5,0.25,0.25,A native Fade entrance makes the caption appear.
+2,2,8,CAPTION_S02_02,2.5,5,0.25,0.25,After Previous controls the hold time and exit fade.
+2,2,8,CAPTION_S02_03,5,8,0.25,0.25,The next subtitle replaces the previous one automatically.
+3,3,8,CAPTION_S03_01,0,2.5,0.25,0.25,Check the duration of the actual exported MP4.
+3,3,8,CAPTION_S03_02,2.5,5,0.25,0.25,Inspect every caption for clear appearance and disappearance.
+3,3,8,CAPTION_S03_03,5,8,0.25,0.25,The result is an editable deck and a captioned video.

@@ -1,0 +1,9 @@
+# Keep workstation state and temporary QA/export files out of the public repository.
+.DS_Store
+Thumbs.db
+~$*.pptx
+*.tmp
+__pycache__/
+.venv/
+local-output/
+video-check/

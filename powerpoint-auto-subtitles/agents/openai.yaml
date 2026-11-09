@@ -1,0 +1,4 @@
+interface:
+  display_name: "PowerPoint Subtitles and Video"
+  short_description: "Add timed editable captions and export PowerPoint video"
+  default_prompt: "Use $powerpoint-auto-subtitles to add editable timed subtitles to my PowerPoint and export a verified autoplay MP4."
