@@ -155,7 +155,7 @@ Without a draft, replace the caption-source line with:
 
 Without a fixed duration requirement, replace the target with “Estimate from text length and report the final duration.”
 
-## Step 3: The Agent generates and checks the timeline
+### 2.1 The Agent generates and checks the timeline
 
 After the complete request in Step 2, the Agent performs production and verification in sequence. You do not need to run individual commands.
 
@@ -163,13 +163,13 @@ The Agent reads your confirmed `captions.md` and creates `timeline-estimated.csv
 
 The Agent checks total duration, long cues and text fit. A target such as 160 seconds must be compatible with readability, not achieved by truncating captions or forcing an unreadable pace. See [timing rules](powerpoint-auto-subtitles/references/caption-authoring.md) for the formula.
 
-## Step 4: The Agent animates and exports
+### 2.2 The Agent animates and exports
 
 The Agent uses [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1) to create editable caption boxes from the timeline, apply native **fade in → hold → fade out** effects, set automatic slide advance, and export MP4 and PDF through PowerPoint.
 
 Preserve existing charts, values and editable shapes. Existing animations need deliberate timeline merging: the general helper does not merge them or rearrange charts automatically. Synchronized diagram changes require separate scene authoring against the same timeline.
 
-## Step 5: The Agent verifies and delivers
+### 2.3 The Agent verifies and delivers
 
 The Agent decodes the actual MP4 and checks its duration, every caption, slide transitions and selected fade boundaries for residual text, overlaps and obstruction. Successful export is not playback verification, and the frame extractor does not judge visual quality automatically.
 

@@ -150,7 +150,7 @@ PPT 文件：C:/work/my-presentation.pptx
 
 若不需要固定总时长，将“目标总时长”改成“按字数估算，报告最终总时长”。160 秒不是强制默认值。
 
-## 第三步：Agent 生成并检查时间表
+### 2.1 Agent 生成并检查时间表
 
 提交第二步的完整请求后，以下制作与检查工作由 Agent 连续执行，你不需要逐条运行命令。
 
@@ -158,13 +158,13 @@ Agent 读取确认后的 `captions.md`，生成 `timeline-estimated.csv`，记�
 
 Agent 检查预计总时长、字幕是否过长以及文字是否放得下。指定 160 秒等目标时，需要核对可读性与时长是否兼容；不能靠截断文字或强行加速凑时长。具体公式见 [计时规则](powerpoint-auto-subtitles/references/caption-authoring.md)。
 
-## 第四步：Agent 添加动画并导出
+### 2.2 Agent 添加动画并导出
 
 Agent 使用 [add-subtitles-and-export.ps1](powerpoint-auto-subtitles/scripts/add-subtitles-and-export.ps1)，依据时间表创建可编辑字幕文本框，添加原生 **淡入 → 停留 → 淡出** 动画，设置自动翻页，再由 PowerPoint 导出 MP4 和 PDF 预览。
 
 原有图表、数值和可编辑图形需要保留。已有动画时，Agent 要有针对性地合并时间线；通用脚本不会自动合并已有动画，也不会自动重新排版图表。上方图形的同步变化需单独按字幕时间表编排。
 
-## 第五步：Agent 检查视频并交付
+### 2.3 Agent 检查视频并交付
 
 Agent 解码实际 MP4，检查真实总时长、每条字幕、翻页及部分淡入淡出边界，确认没有残影、重叠或遮挡。“导出成功”不是播放检查完成；抽帧工具也不会自动判断画面是否合格。
 
