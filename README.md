@@ -46,20 +46,38 @@ Refresh the available skills or start a new Codex chat if the new skill is not l
 
 ## Complete workflow
 
-**PPTX and caption source → normalized caption document → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
+**Agent drafts captions from PPTX → user edits the document → Agent receives final captions → estimated and checked timeline → native animation and automatic advance → MP4 export → playback QA and delivery.**
 
-## Step 1: Prepare the caption file first
+## Step 1: Have the Agent draft captions, then edit them
 
-Organize the captions before generating animation timings or video. You do not need to supply timestamps or a CSV yet.
+You do not need to fill a blank template first. Give the PPTX to the Codex Agent: it reads slide text, figures and speaker notes, drafts per-slide captions, and saves a standard `captions.md`. Open that file, revise the wording and check the facts before producing the video.
 
-1. Write the captions for each slide in the actual PPTX order.
-2. Keep one idea per cue and list cues in playback order. The number of cues can vary by slide.
-3. Put all slides in one **UTF-8 `captions.md` or `captions.txt`** using the format below.
-4. For an English video, supply final English captions, or explicitly ask Codex to translate your draft before formatting it.
+**1. Ask the Agent to generate a draft**
 
-[Blank caption template](examples/captions.template.md) · [Completed English example](examples/captions.en.md) · [Chinese format example](examples/captions.zh-CN.md)
+Replace these example paths with real locations:
 
 ```text
+Use $powerpoint-auto-subtitles to draft English captions automatically from my PPTX.
+PPTX: C:/work/my-presentation.pptx
+Caption output: C:/work/captions.md (UTF-8)
+Review notes: C:/work/captions-review.md
+Read each slide's visible text, figures and speaker notes, in actual slide order.
+Write one idea per cue in presentation order. Preserve values, units and qualifications.
+Do not invent unsupported claims or mechanically copy every chart label.
+Use ## Slide N headings and one - bullet per complete English caption.
+List ambiguous, unreadable or uncertain content in the separate review notes,
+not in the visible captions. Do not fabricate captions for pages you cannot interpret.
+For this stage, deliver only the draft and review notes. I will edit them manually
+before asking you to create animations and export the video.
+```
+
+If you have speaker material, add “Reference script: C:/work/notes.docx”. Ask the Agent to flag conflicts with the deck in the review notes instead of choosing a value silently.
+
+**2. Open and edit `captions.md`**
+
+Use Notepad, VS Code or another text editor. Check slide correspondence, values and units; remove unwanted narration, add necessary explanations, polish the English and split long cues. Save as UTF-8 while retaining this structure:
+
+```markdown
 # Captions
 
 ## Slide 1
@@ -71,30 +89,32 @@ Organize the captions before generating animation timings or video. You do not n
 - The following animation explains the data flow.
 ```
 
-**Format rules:**
+- `## Slide N` is the actual one-based slide index, not its printed page label.
+- Each `- ` line is one cue. Keep it on one physical line; multiple cues per slide are welcome.
+- Only visible caption text belongs here; questions and suggestions belong in the review notes.
+- Check all slides. The standard exporter requires at least one cue per slide; resolve incomplete or uncertain pages before export instead of using placeholders.
+- No timestamps are needed yet. Timing will be estimated from the edited wording.
 
-- `## Slide 1` refers to the first slide in the file; number consecutively from 1, independently of printed page labels.
-- Every `- ` line is one complete cue. Do not insert a physical line break inside it.
-- Put only visible caption text in the document. Send visual directions, comments, reading speed and target duration separately in the task message.
-- Include at least one cue per slide. Add or remove template sections to match the deck and replace every bracketed placeholder.
-- Leave timestamps out. Generate estimates after formatting, then review readability and total duration.
+[Standard template](examples/captions.template.md) · [English example](examples/captions.en.md) · [Chinese format example](examples/captions.zh-CN.md) (format references, not forms you must fill from scratch).
 
-For Word, TXT or loosely organized notes, provide the draft path in the complete request below. Codex first normalizes it into `captions.md`, checks page mapping, then continues to timing, animation and export. If there is no draft, explicitly request caption drafting from the deck. Resolve missing or ambiguous page mappings before continuing.
+**3. Return the edited captions to the Agent**
+
+After editing, use the Step 2 request below and name `C:/work/captions.md` as the final caption source. The Agent should retain your edited wording and recalculate timing, not replace your script with a fresh draft from the deck. Explicitly request a one-pass workflow if you want to skip manual review.
 
 ## Step 2: Submit the complete production request
 
-Replace the example paths with actual existing files and a new output folder. This example accepts a draft document or an already normalized caption file. An attachment can replace a path if identified by its exact filename. If using audio, give its path and request alignment to that recording.
+Replace the example paths with actual existing files and a new output folder. This example uses the caption document you manually edited in Step 1. An attachment can replace a path if identified by its exact filename. If using audio, give its path and request alignment to that recording.
 
 ```text
 Use $powerpoint-auto-subtitles.
 PPTX: C:/work/my-presentation.pptx
-Caption source: C:/work/subtitle-draft.docx (or an already normalized captions.md)
-Caption language: English. Translate a Chinese draft while preserving meaning, values and units.
+Caption source: C:/work/captions.md (my manually edited final English captions)
+Caption language: English. Preserve my edited wording; do not regenerate or overwrite the script.
 Output directory: C:/work/captioned-output
 Narration: none; create a silent captioned video.
 Target total duration: 160 seconds.
-Read the deck and caption source. Normalize the draft into captions.md in the output folder.
-Check slide-to-caption correspondence; reuse a valid caption file if already supplied.
+Read the deck and final captions. Check slide-to-caption correspondence.
+Calculate timings from the final text and save a copy in the output folder without overwriting the input.
 Then continue to timeline generation, animation and video export; do not stop after formatting captions.
 Estimate reading time from text length. If the captions cannot fit readably within
 160 seconds, report the conflict rather than silently shortening text or speeding it up.
