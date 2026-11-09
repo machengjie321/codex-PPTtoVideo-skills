@@ -84,7 +84,7 @@ Refresh the available skills or start a new Codex chat if the new skill is not l
 
 ## Complete workflow
 
-**Prepare captions (choose: Agent drafts from PPTX / user supplies captions and Agent normalizes the format) → user reviews, edits and confirms → Agent prepares the caption area → user confirms the layout → confirmed PPTX and captions → Agent automatically completes: timeline estimation and checks → native animation and automatic advance → MP4 export → playback QA and delivery.**
+**Prepare captions (choose: Agent drafts from PPTX / user supplies captions and Agent normalizes the format) → user reviews, edits and confirms → Agent standardizes the layout and reserves caption space → user reviews and confirms → use the confirmed PPTX and captions → (Agent automatically completes: timeline estimation and checks → native animation and automatic slide advance → MP4 export → verification and delivery).**
 
 **Automated stage:** After the user confirms the captions and layout and submits the production request, the Agent completes timeline generation and checks, native animation and automatic advance, MP4 export, actual playback inspection and delivery in sequence. No separate step-by-step commands or manual script execution are needed. Missing inputs, unreadable content or incompatible duration constraints are reported when user input is necessary.
 
